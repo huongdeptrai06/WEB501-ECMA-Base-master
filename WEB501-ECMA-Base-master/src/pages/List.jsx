@@ -1,130 +1,80 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState, useEffect } from 'react'
+import axios from 'axios'
+import toast from 'react-hot-toast'
 
-const API_URL = "http://localhost:3000/tours";
-
-function List() {
-  const [tours, setTours] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+function ListPage() {
+   const [tours, setTours] = useState([])
 
   useEffect(() => {
-    const fetchTours = async () => {
+    console.log('Chạy 1 lần khi mount')
+    const getTours = async () => {
       try {
-        const response = await fetch(API_URL);
-        if (!response.ok) {
-          throw new Error("Không thể lấy dữ liệu tours");
-        }
-        const data = await response.json();
-        setTours(data);
-      } catch (err) {
-        setError(err.message || "Đã có lỗi xảy ra");
-      } finally {
-        setLoading(false);
+        const { data } = await axios.get('http://localhost:3001/tours')
+        setTours(data)
+      } catch (error) {
+        console.log(error)
       }
+    }
+    getTours()
+  }, [])
+  const deleteTour = async (id) => {
+        try {
+          if (confirm('Tôi muốn xóa tour này')){
+            await axios.delete('http://localhost:3001/tours/' + id)
+            setTours(tours.filter(tour => tour.id !== id))
+            toast.success('ok anh đã xóa được')          }
+        } catch (error) {
+          ttoast.error('error')
+        }
     };
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-semibold mb-6">Danh sách Tour</h1>
 
-    fetchTours();
-  }, []);
-
-  const formatter = useMemo(
-    () =>
-      new Intl.NumberFormat("vi-VN", {
-        style: "currency",
-        currency: "VND",
-        maximumFractionDigits: 0,
-      }),
-    []
-  );
-
-  const renderContent = () => {
-    if (loading) {
-      return (
-        <div className="rounded-lg border border-dashed border-gray-300 py-10 text-center text-gray-500">
-          Đang tải danh sách tours...
-        </div>
-      );
-    }
-
-    if (error) {
-      return (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-600">
-          {error}
-        </div>
-      );
-    }
-
-    if (!tours.length) {
-      return (
-        <div className="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-yellow-700">
-          Hiện chưa có tour nào. Thử thêm mới để bắt đầu.
-        </div>
-      );
-    }
-
-    return (
-      <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-        <table className="w-full divide-y divide-gray-200 bg-white text-left text-sm">
-          <thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
+      <div className="overflow-x-auto">
+        <table className="w-full border border-gray-300 rounded-lg">
+          <thead className="bg-gray-100">
             <tr>
-              <th className="px-4 py-3">#</th>
-              <th className="px-4 py-3">Tour</th>
-              <th className="px-4 py-3">Điểm đến</th>
-              <th className="px-4 py-3">Thời lượng</th>
-              <th className="px-4 py-3 text-right">Giá</th>
-              <th className="px-4 py-3 text-center">Chỗ còn</th>
+              <th className="px-4 py-2 border text-center">STT</th>
+              <th className="px-4 py-2 border text-center">Tên Tour</th>
+              <th className="px-4 py-2 border text-center">Địa điểm</th>
+              <th className="px-4 py-2 border text-center">Thời gian Tour</th>
+              <th className="px-4 py-2 border text-center">Giá</th>
+              <th className="px-4 py-2 border text-center">Thumbnail</th>
+              <th className="px-4 py-2 border text-center">Mô tả</th>
+              <th className="px-4 py-2 border text-center">Số lượng Tour</th>
+              <th className="px-4 py-2 border text-center">Hành động</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 text-gray-700">
-            {tours.map((tour, index) => (
-              <tr key={tour.id} className="hover:bg-gray-50">
-                <td className="px-4 py-3 font-medium text-gray-500">
-                  {index + 1}
+
+          <tbody>
+            {tours.map((tour) => (
+              <tr key={tour.id}>
+                <td className="px-4 py-2 border text-center">{tour.id}</td>
+                <td className="px-4 py-2 border">{tour.name}</td>
+                <td className="px-4 py-2 border">{tour.destination}</td>
+                <td className="px-4 py-2 border">{tour.duration}</td>
+                <td className="px-4 py-2 border font-bold text-red-600">
+                  {tour.price.toLocaleString()} đ
                 </td>
-                <td className="px-4 py-3">
-                  <p className="font-semibold text-gray-900">{tour.name}</p>
-                  <p className="text-xs text-gray-500 truncate">
-                    {tour.description}
-                  </p>
+                <td className="px-4 py-2 border">
+                  <img
+                    src={tour.image}
+                    className="w-20 h-14"
+                  />
                 </td>
-                <td className="px-4 py-3">{tour.destination}</td>
-                <td className="px-4 py-3">{tour.duration}</td>
-                <td className="px-4 py-3 text-right font-semibold text-blue-600">
-                  {formatter.format(tour.price)}
-                </td>
-                <td className="px-4 py-3 text-center">
-                  <span
-                    className={`inline-flex min-w-[64px] items-center justify-center rounded-full px-3 py-1 text-xs font-semibold ${
-                      tour.available > 0
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {tour.available}
-                  </span>
+                <td className="px-4 py-2 border">{tour.description}</td>
+                <td className="px-4 py-2 border">{tour.available}</td>
+                <td className="px-4 py-2 border text-center">
+                  <button className="px-3 py-1 bg-blue-500 text-white rounded ">Sửa</button>
+                  <button className="px-3 py-1 bg-red-500 text-white rounded"onClick={() => deleteTour(tour.id)}>Xóa</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    );
-  };
-
-  return (
-    <section className="space-y-6">
-      <header>
-        <p className="text-sm uppercase tracking-wider text-blue-600">
-          Danh sách tours
-        </p>
-        <h1 className="text-3xl font-semibold text-gray-900">Tours hiện có</h1>
-        <p className="text-gray-600">
-          Theo dõi thông tin tour, giá bán và số lượng chỗ trống còn lại.
-        </p>
-      </header>
-
-      {renderContent()}
-    </section>
+    </div>
   );
 }
-
-export default List;
+export default ListPage;
