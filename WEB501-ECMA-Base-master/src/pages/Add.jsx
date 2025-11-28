@@ -1,27 +1,26 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import toast from "react-hot-toast";
 
 function AddPage() {
   const navigate = useNavigate();
-  
+
   const [form, setForm] = useState({
     name: "",
+    destination: "",
     duration: "",
     price: "",
     image: "",
     description: "",
     available: "",
-    category: "",
-    active: true,
   });
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setForm({
       ...form,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value,
     });
   };
 
@@ -34,22 +33,23 @@ function AddPage() {
         available: Number(form.available),
       });
 
-      alert("Thêm tour thành công!");
+      toast.success("Thêm tour thành công!");
+
       setForm({
         name: "",
+        destination: "",
         duration: "",
         price: "",
         image: "",
         description: "",
         available: "",
-        category: "",
-        active: true,
       });
+
+      navigate("/list");
     } catch (err) {
       console.log(err);
-      alert("Có lỗi xảy ra!");
+      toast.error("Có lỗi xảy ra!");
     }
-    navigate("/list");
   };
 
   return (
@@ -57,12 +57,24 @@ function AddPage() {
       <h1 className="text-2xl font-semibold mb-6">Thêm Tour Mới</h1>
 
       <form className="space-y-6" onSubmit={handleSubmit}>
+        
         <div>
           <label className="block font-medium mb-1">Tên Tour</label>
           <input
             type="text"
             name="name"
             value={form.name}
+            onChange={handleChange}
+            className="w-full border rounded-lg px-3 py-2"
+          />
+        </div>
+
+        <div>
+          <label className="block font-medium mb-1">Điểm đến</label>
+          <input
+            type="text"
+            name="destination"
+            value={form.destination}
             onChange={handleChange}
             className="w-full border rounded-lg px-3 py-2"
           />
@@ -120,31 +132,6 @@ function AddPage() {
             onChange={handleChange}
             className="w-full border rounded-lg px-3 py-2"
           />
-        </div>
-
-        <div>
-          <label className="block font-medium mb-1">Danh mục</label>
-          <select
-            name="category"
-            value={form.category}
-            onChange={handleChange}
-            className="w-full border rounded-lg px-3 py-2 bg-white"
-          >
-            <option value="">-- chọn danh mục --</option>
-            <option value="tour nội địa">Tour nội địa</option>
-            <option value="tour nước ngoài">Tour nước ngoài</option>
-          </select>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            name="active"
-            checked={form.active}
-            onChange={handleChange}
-            className="h-4 w-4"
-          />
-          <label>Hiển thị Tour</label>
         </div>
 
         <button
