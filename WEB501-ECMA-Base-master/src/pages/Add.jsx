@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 import axios from "axios";
-import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 function AddPage() {
   const navigate = useNavigate();
@@ -14,20 +14,19 @@ function AddPage() {
     image: "",
     description: "",
     available: "",
+    category: "Tour nội địa",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm({
-      ...form,
-      [name]: value,
-    });
+    setForm({ ...form, [name]: value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
     try {
-      await axios.post("http://localhost:3001/tours", {
+      await axios.post("http://localhost:3000/tours", {
         ...form,
         price: Number(form.price),
         available: Number(form.available),
@@ -35,20 +34,9 @@ function AddPage() {
 
       toast.success("Thêm tour thành công!");
 
-      setForm({
-        name: "",
-        destination: "",
-        duration: "",
-        price: "",
-        image: "",
-        description: "",
-        available: "",
-      });
-
-      navigate("/list");
-    } catch (err) {
-      console.log(err);
-      toast.error("Có lỗi xảy ra!");
+      navigate("/List");
+    } catch (error) {
+      toast.error(error.message);
     }
   };
 
@@ -120,7 +108,7 @@ function AddPage() {
             value={form.description}
             onChange={handleChange}
             className="w-full border rounded-lg px-3 py-2 h-24"
-          ></textarea>
+          />
         </div>
 
         <div>

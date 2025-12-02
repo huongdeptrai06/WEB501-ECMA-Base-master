@@ -1,13 +1,12 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
-import toast from "react-hot-toast";
+import { useEffect, useState } from 'react'
+import axios from 'axios'
+import { toast } from 'react-hot-toast'
+import {useNavigate,useParams } from 'react-router-dom'
 
-const API_URL = "http://localhost:3001/tours";
-
-export default function EditPage() {
+function EditPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [form, setForm] = useState({
     name: "",
     destination: "",
@@ -15,36 +14,41 @@ export default function EditPage() {
     price: "",
     image: "",
     description: "",
+    available: "",
   });
 
   const handleChange = (e) => {
     setForm({
       ...form,
-      [e.target.name]: e.target.value,
+      [e.target.name]: e.target.value
     });
   };
 
   useEffect(() => {
-    const fetchTour = async () => {
+    const getTour = async () => {
       try {
-        const { data } = await axios.get(`${API_URL}/${id}`);
+        const { data } = await axios.get(`http://localhost:3000/tours/${id}`);
         setForm(data);
       } catch {
         toast.error("Không tìm thấy tour");
-        navigate("/List");
       }
     };
-    fetchTour();
+
+    getTour();
   }, [id]);
 
-  const onSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`${API_URL}/${id}`, form);
+      await axios.put(`http://localhost:3000/tours/${id}`, {
+        ...form,
+        price: Number(form.price),
+        available: Number(form.available)
+      });
       toast.success("Cập nhật thành công");
       navigate("/List");
-    } catch {
-      toast.error("Lỗi khi cập nhật");
+    } catch (error) {
+      toast.error(error.message);
     }
   };
 
@@ -52,7 +56,8 @@ export default function EditPage() {
     <div className="max-w-xl mx-auto p-4">
       <h2 className="text-2xl font-bold mb-4">Chỉnh sửa tour {id}</h2>
 
-      <form onSubmit={onSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        
         <div>
           <label>Tên tour</label>
           <input
@@ -95,7 +100,7 @@ export default function EditPage() {
         </div>
 
         <div>
-          <label>Ảnh (URL)</label>
+          <label>Ảnh</label>
           <input
             className="border p-2 w-full"
             name="image"
@@ -112,6 +117,17 @@ export default function EditPage() {
             name="description"
             value={form.description}
             onChange={handleChange}
+          ></textarea>
+        </div>
+
+        <div>
+          <label>Số lượng</label>
+          <input
+            type="number"
+            className="border p-2 w-full"
+            name="available"
+            value={form.available}
+            onChange={handleChange}
           />
         </div>
 
@@ -122,3 +138,5 @@ export default function EditPage() {
     </div>
   );
 }
+
+export default EditPage;
