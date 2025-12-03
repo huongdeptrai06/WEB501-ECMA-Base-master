@@ -1,29 +1,28 @@
-import { useState } from "react";
-import { toast } from "react-hot-toast";
-import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
+import { useState } from 'react'
+import { toast } from 'react-hot-toast'
+import axios from 'axios'
+import { useNavigate, Link } from 'react-router-dom'
 
 function LoginPage() {
-  const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const nav = useNavigate()
+  
+  const handleSubmit = async event => {
+    event.preventDefault()
     try {
-      const { data } = await axios.post("http://localhost:3000/login", form);
-      toast.success("Đăng nhập thành công!");
-      localStorage.setItem("user", JSON.stringify(data));
-      window.dispatchEvent(new Event("localStorageChange"));
-      navigate("/list");
+      const { data } = await axios.post('http://localhost:3000/login', {
+        email, 
+        password,
+      })
+      toast.success('Đăng nhập thành công!')
+      localStorage.setItem('user', JSON.stringify(data))
+      window.dispatchEvent(new Event('localStorageChange'))
+      nav('/list')
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message);
+      toast.error(error.response?.data?.message || error.message)
     }
-  };
+  }
 
   return (
     <div className="p-6 max-w-md mx-auto mt-10">
@@ -34,8 +33,8 @@ function LoginPage() {
           <input
             type="email"
             name="email"
-            value={form.email}
-            onChange={handleChange}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="w-full border p-2 rounded"
             required
           />
@@ -45,8 +44,8 @@ function LoginPage() {
           <input
             type="password"
             name="password"
-            value={form.password}
-            onChange={handleChange}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             className="w-full border p-2 rounded"
             required
           />

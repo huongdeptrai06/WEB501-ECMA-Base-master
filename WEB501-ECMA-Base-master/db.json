@@ -9,6 +9,11 @@
       "email": "hieu123456@gmail.com",
       "password": "$2a$10$lq33TdaUMlGYEfr989VWeuFr6/aK.CX0BQ7nHib2e32M/bTc5QHRe",
       "id": 2
+    },
+    {
+      "email": "hieun2v@gmail.com",
+      "password": "$2a$10$KCo0bwKrkwW4PjYebxzcJOikfC2MreeWaE6/N0mRzkW1MIqU7WHaC",
+      "id": 3
     }
   ],
   "tours": [

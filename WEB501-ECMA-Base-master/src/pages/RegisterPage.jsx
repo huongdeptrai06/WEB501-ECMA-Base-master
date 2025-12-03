@@ -1,27 +1,26 @@
-import { useState } from "react";
-import { toast } from "react-hot-toast";
-import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
+import { useState } from 'react'
+import { toast } from 'react-hot-toast'
+import axios from 'axios'
+import { useNavigate, Link } from 'react-router-dom'
 
 function RegisterPage() {
-  const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const navigate = useNavigate()
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async event => {
+    event.preventDefault()
     try {
-      await axios.post("http://localhost:3000/register", form);
-      toast.success("Đăng ký thành công!");
-      navigate("/login");
+      await axios.post('http://localhost:3000/register', {
+        email, 
+        password,
+      })
+      toast.success('Đăng ký thành công!')
+      navigate('/login')
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message);
+      toast.error(error.response?.data?.message || error.message)
     }
-  };
+  }
 
   return (
     <div className="p-6 max-w-md mx-auto mt-10">
@@ -32,8 +31,8 @@ function RegisterPage() {
           <input
             type="email"
             name="email"
-            value={form.email}
-            onChange={handleChange}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="w-full border p-2 rounded"
             required
           />
@@ -43,8 +42,8 @@ function RegisterPage() {
           <input
             type="password"
             name="password"
-            value={form.password}
-            onChange={handleChange}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             className="w-full border p-2 rounded"
             required
           />
