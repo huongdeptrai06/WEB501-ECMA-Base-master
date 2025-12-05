@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { toast } from "react-hot-toast";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { tourService } from "../services/tourService";
 
 function AddPage() {
   const navigate = useNavigate();
@@ -15,6 +15,7 @@ function AddPage() {
     description: "",
     available: "",
     category: "Tour nội địa",
+    active: true,
   });
 
   const handleChange = (e) => {
@@ -25,18 +26,13 @@ function AddPage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    try {
-      await axios.post("http://localhost:3000/tours", {
-        ...form,
-        price: Number(form.price),
-        available: Number(form.available),
-      });
+    const result = await tourService.create(form);
 
+    if (result.success) {
       toast.success("Thêm tour thành công!");
-
-      navigate("/List");
-    } catch (error) {
-      toast.error(error.message);
+      navigate("/list");
+    } else {
+      toast.error(result.error || "Không thể thêm tour mới");
     }
   };
 
@@ -45,7 +41,6 @@ function AddPage() {
       <h1 className="text-2xl font-semibold mb-6">Thêm Tour Mới</h1>
 
       <form className="space-y-6" onSubmit={handleSubmit}>
-        
         <div>
           <label className="block font-medium mb-1">Tên Tour</label>
           <input
@@ -120,6 +115,34 @@ function AddPage() {
             onChange={handleChange}
             className="w-full border rounded-lg px-3 py-2"
           />
+        </div>
+
+        <div>
+          <label className="block font-medium mb-1">Danh mục</label>
+          <select
+            name="category"
+            value={form.category}
+            onChange={handleChange}
+            className="w-full border rounded-lg px-3 py-2"
+          >
+            <option value="Tour nội địa">Tour nội địa</option>
+            <option value="Tour quốc tế">Tour quốc tế</option>
+            <option value="Tour du lịch biển">Tour du lịch biển</option>
+            <option value="Tour khám phá">Tour khám phá</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              name="active"
+              checked={form.active}
+              onChange={(e) => setForm({ ...form, active: e.target.checked })}
+              className="w-4 h-4"
+            />
+            <span className="font-medium">Tour đang hoạt động</span>
+          </label>
         </div>
 
         <button

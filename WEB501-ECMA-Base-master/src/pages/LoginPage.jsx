@@ -1,28 +1,31 @@
-import { useState } from 'react'
-import { toast } from 'react-hot-toast'
-import axios from 'axios'
-import { useNavigate, Link } from 'react-router-dom'
+import { useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { useNavigate, Link } from 'react-router-dom';
+import { authService } from '../services/authService';
 
 function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const nav = useNavigate()
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
   
-  const handleSubmit = async event => {
-    event.preventDefault()
-    try {
-      const { data } = await axios.post('http://localhost:3000/login', {
-        email, 
-        password,
-      })
-      toast.success('Đăng nhập thành công!')
-      localStorage.setItem('user', JSON.stringify(data))
-      window.dispatchEvent(new Event('localStorageChange'))
-      nav('/list')
-    } catch (error) {
-      toast.error(error.response?.data?.message || error.message)
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setIsLoading(true);
+
+    const result = await authService.login(email, password);
+
+    setIsLoading(false);
+
+    if (result.success) {
+      toast.success('Đăng nhập thành công!');
+      localStorage.setItem('user', JSON.stringify(result.data));
+      window.dispatchEvent(new Event('localStorageChange'));
+      navigate('/list');
+    } else {
+      toast.error(result.error || 'Đăng nhập thất bại');
     }
-  }
+  };
 
   return (
     <div className="p-6 max-w-md mx-auto mt-10">
@@ -52,9 +55,10 @@ function LoginPage() {
         </div>
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          disabled={isLoading}
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Đăng nhập
+          {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
         </button>
       </form>
       <div className="mt-4 text-center">

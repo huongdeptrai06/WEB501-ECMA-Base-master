@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
-import axios from 'axios'
-import { toast } from 'react-hot-toast'
-import {useNavigate,useParams } from 'react-router-dom'
+import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { useNavigate, useParams } from 'react-router-dom';
+import { tourService } from '../services/tourService';
 
 function EditPage() {
   const { id } = useParams();
@@ -15,6 +15,8 @@ function EditPage() {
     image: "",
     description: "",
     available: "",
+    category: "Tour nội địa",
+    active: true,
   });
 
   const handleChange = (e) => {
@@ -26,11 +28,11 @@ function EditPage() {
 
   useEffect(() => {
     const getTour = async () => {
-      try {
-        const { data } = await axios.get(`http://localhost:3000/tours/${id}`);
-        setForm(data);
-      } catch {
-        toast.error("Không tìm thấy tour");
+      const result = await tourService.getById(id);
+      if (result.success) {
+        setForm(result.data);
+      } else {
+        toast.error(result.error || 'Không tìm thấy tour');
       }
     };
 
@@ -39,16 +41,12 @@ function EditPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await axios.put(`http://localhost:3000/tours/${id}`, {
-        ...form,
-        price: Number(form.price),
-        available: Number(form.available)
-      });
+    const result = await tourService.update(id, form);
+    if (result.success) {
       toast.success("Cập nhật thành công");
-      navigate("/List");
-    } catch (error) {
-      toast.error(error.message);
+      navigate("/list");
+    } else {
+      toast.error(result.error || 'Không thể cập nhật tour');
     }
   };
 
@@ -131,7 +129,35 @@ function EditPage() {
           />
         </div>
 
-        <button className="bg-blue-600 text-white px-4 py-2 rounded">
+        <div>
+          <label>Danh mục</label>
+          <select
+            name="category"
+            value={form.category}
+            onChange={handleChange}
+            className="border p-2 w-full"
+          >
+            <option value="Tour nội địa">Tour nội địa</option>
+            <option value="Tour quốc tế">Tour quốc tế</option>
+            <option value="Tour du lịch biển">Tour du lịch biển</option>
+            <option value="Tour khám phá">Tour khám phá</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              name="active"
+              checked={form.active}
+              onChange={(e) => setForm({ ...form, active: e.target.checked })}
+              className="w-4 h-4"
+            />
+            <span>Tour đang hoạt động</span>
+          </label>
+        </div>
+
+        <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
           Cập nhật
         </button>
       </form>
